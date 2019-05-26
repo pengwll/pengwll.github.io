@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="简介NSOperation、NSOperationQueue 是一套OC的多线程解决方案，实际上NSOperation是对GCD的封装，面向对象并且提供一些高级的api，可以实现任务之间的依赖，最大并发任务数，取消任务等高级功能。参考2015年的 WWDC Advanced NSOperations。">
+<meta name="keywords" content="NSOperation,NSOperationQueue">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NSOperation &amp; NSOperationQueue">
+<meta property="og:url" content="http://yoursite.com/2019/05/15/NSOperation-NSOperationQueue/index.html">
+<meta property="og:site_name" content="Pengwll&#39;s Home">
+<meta property="og:description" content="简介NSOperation、NSOperationQueue 是一套OC的多线程解决方案，实际上NSOperation是对GCD的封装，面向对象并且提供一些高级的api，可以实现任务之间的依赖，最大并发任务数，取消任务等高级功能。参考2015年的 WWDC Advanced NSOperations。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2019/05/15/NSOperation-NSOperationQueue/837806-e48f3b3c179e67cc.png">
+<meta property="og:updated_time" content="2019-05-26T12:55:10.483Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="NSOperation &amp; NSOperationQueue">
+<meta name="twitter:description" content="简介NSOperation、NSOperationQueue 是一套OC的多线程解决方案，实际上NSOperation是对GCD的封装，面向对象并且提供一些高级的api，可以实现任务之间的依赖，最大并发任务数，取消任务等高级功能。参考2015年的 WWDC Advanced NSOperations。">
+<meta name="twitter:image" content="http://yoursite.com/2019/05/15/NSOperation-NSOperationQueue/837806-e48f3b3c179e67cc.png">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://yoursite.com/2019/05/15/NSOperation-NSOperationQueue/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>NSOperation & NSOperationQueue | Pengwll's Home</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Pengwll's Home</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">点滴记录</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/05/15/NSOperation-NSOperationQueue/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Pengwll">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Pengwll's Home">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">NSOperation & NSOperationQueue
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-15 19:36:44" itemprop="dateCreated datePublished" datetime="2019-05-15T19:36:44+08:00">2019-05-15</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>NSOperation、NSOperationQueue 是一套OC的多线程解决方案，实际上NSOperation是对GCD的封装，面向对象并且提供一些高级的api，可以实现任务之间的依赖，最大并发任务数，取消任务等高级功能。参考2015年的 WWDC <a href="https://developer.apple.com/videos/play/wwdc2015/226/" target="_blank" rel="noopener">Advanced NSOperations</a>。</p>
+<a id="more"></a>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><ul>
+<li>NSOperation可以单独使用，创建后直接调用start方法，系统<strong>同步执行</strong>操作。</li>
+<li>配合NSOperationQueue 实现异步执行，实现步骤：<ol>
+<li>创建NSBlockOperation，或者是NSOperation的子类</li>
+<li>创建 NSOperationQueue 对象</li>
+<li>NSOperation 对象添加到 NSOperationQueue 对象中<br>系统就会自动将 NSOperationQueue 中的 NSOperation 取出来，在新线程中执行操作。</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">let opt = BlockOperation.init &#123;</span><br><span class="line">    print(&quot;opt&quot;)</span><br><span class="line">&#125;</span><br><span class="line">let optQueue  = OperationQueue.init()</span><br><span class="line">optQueue.addOperation(opt)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NSInvocationOperation *invocationOperation = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(method) object:nil];</span><br><span class="line">[[NSOperationQueue mainQueue] addOperation: invocationOperation];</span><br></pre></td></tr></table></figure>
+<h2 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h2><ol>
+<li><p>NSOperation可以设置依赖</p>
+<pre><code>NSBlockOperation *operation2 = [NSBlockOperation blockOperationWithBlock:^{
+    NSLog(@&quot;excute operation2&quot;);        
+    }];
+NSBlockOperation *operation1 = [NSBlockOperation blockOperationWithBlock:^{
+     NSLog(@&quot;excute operation1&quot;);
+  }];
+[operation2 addDependency:operation1];
+[queue addOperation:operation2];
+[queue addOperation:operation1]; 
+</code></pre></li>
+<li><p>可以执行cancel操作</p>
+<pre><code>- (void)cancel;
+- (void)cancelAllOperations;
+</code></pre></li>
+<li><p>可以指定优先级</p>
+<pre><code>@property NSOperationQueuePriority queuePriority;
+</code></pre></li>
+<li><p>NSOperationQueue设置最大并发数</p>
+<pre><code>@property NSInteger maxConcurrentOperationCount;
+</code></pre></li>
+<li><p>operation执行完成时回调</p>
+<pre><code>@property (nullable, copy) void (^completionBlock)(void) API_AVAILABLE(macos(10.6), ios(4.0), watchos(2.0), tvos(9.0));
+</code></pre></li>
+</ol>
+<p><img src="/2019/05/15/NSOperation-NSOperationQueue/837806-e48f3b3c179e67cc.png" alt="operation状态图"></p>
+<h2 id="查看Swift的Operation、OperationQueue的源码实现。"><a href="#查看Swift的Operation、OperationQueue的源码实现。" class="headerlink" title="查看Swift的Operation、OperationQueue的源码实现。"></a>查看Swift的Operation、OperationQueue的源码实现。</h2><p>swift中的Operation和OperationQueue就对应OC里面的NSOperation和NSOperationQueue，可以通过查看<a href="https://github.com/apple/swift-corelibs-foundation" target="_blank" rel="noopener">swift corelibs foundation</a>的源码来学习operation的功能实现。</p>
+<h3 id="Operation-swift"><a href="#Operation-swift" class="headerlink" title="Operation.swift"></a>Operation.swift</h3><ol>
+<li><p>首先来看看operation的基本属性：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">open class Operation : NSObject &#123;</span><br><span class="line">    let lock = NSLock()</span><br><span class="line">    internal weak var _queue: OperationQueue?   </span><br><span class="line">    internal var _cancelled = false		            </span><br><span class="line">    internal var _executing = false</span><br><span class="line">    internal var _finished = false</span><br><span class="line">    internal var _ready = false</span><br><span class="line">    internal var _dependencies = Set&lt;Operation&gt;()</span><br><span class="line">#if DEPLOYMENT_ENABLE_LIBDISPATCH</span><br><span class="line">    internal var _group = DispatchGroup()</span><br><span class="line">    internal var _depGroup = DispatchGroup()</span><br><span class="line">    internal var _groups = [DispatchGroup]()</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">    // prioritizedPrevious &amp;&amp; prioritizedNext used to traverse in the order in which the operations need to be dequeued</span><br><span class="line">    fileprivate weak var prioritizedPrevious: Operation?</span><br><span class="line">    fileprivate var prioritizedNext: Operation?</span><br><span class="line">    // orderdedPrevious &amp;&amp; orderdedNext used to traverse in the order in which the operations added to the queue</span><br><span class="line">    fileprivate weak var orderdedPrevious: Operation?</span><br><span class="line">    fileprivate var orderdedNext: Operation?</span><br><span class="line">    </span><br><span class="line">    ....</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> operation属性里包含着几部分内容：</p>
+<ul>
+<li>互斥锁</li>
+<li>weak形式的OperationQueue</li>
+<li>一堆状态变量</li>
+<li>依赖集合_dependencies </li>
+<li>一堆DispatchGroup</li>
+<li>优先级相关的链表“指针”</li>
+</ul>
+</li>
+</ol>
+<ol start="2">
+<li><p>start/main方法</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">open func start() &#123;</span><br><span class="line">    if !isCancelled &#123;</span><br><span class="line">        lock.lock()</span><br><span class="line">        _executing = true</span><br><span class="line">        lock.unlock()</span><br><span class="line">        main()</span><br><span class="line">        lock.lock()</span><br><span class="line">        _executing = false</span><br><span class="line">        lock.unlock()</span><br><span class="line">    &#125;</span><br><span class="line">    finish()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">open func main() &#123; &#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>NOTE: <strong>基类的main方法是一个空方法，start方法中调用main方法，修改_executing的值，最后执行finish方法</strong></p>
+</blockquote>
+</li>
+<li><p>cancel方法</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">open func cancel() &#123;</span><br><span class="line">    lock.lock()</span><br><span class="line">    _cancelled = true</span><br><span class="line">    lock.unlock()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>NOTE: <strong>cancel只是设置一个标记，更新_cancelled的值</strong></p>
+</blockquote>
+</li>
+<li><p>add/remove dependency</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">open func addDependency(_ op: Operation) &#123;</span><br><span class="line">    lock.lock()</span><br><span class="line">    _dependencies.insert(op)</span><br><span class="line">    op.lock.lock()</span><br><span class="line">#if DEPLOYMENT_ENABLE_LIBDISPATCH</span><br><span class="line">    _depGroup.enter()</span><br><span class="line">    op._groups.append(_depGroup)</span><br><span class="line">#endif</span><br><span class="line">    op.lock.unlock()</span><br><span class="line">    lock.unlock()</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line">open func removeDependency(_ op: Operation) &#123;</span><br><span class="line">    lock.lock()</span><br><span class="line">    _dependencies.remove(op)</span><br><span class="line">    op.lock.lock()</span><br><span class="line">#if DEPLOYMENT_ENABLE_LIBDISPATCH</span><br><span class="line">    let groupIndex = op._groups.firstIndex(where: &#123; $0 === self._depGroup &#125;)</span><br><span class="line">    if let idx = groupIndex &#123;</span><br><span class="line">        let group = op._groups.remove(at: idx)</span><br><span class="line">        group.leave()</span><br><span class="line">    &#125;</span><br><span class="line">#endif</span><br><span class="line">    op.lock.unlock()</span><br><span class="line">    lock.unlock()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>NOTE:<br>addDependency 把依赖的op，加入到自己的 <strong>_dependencies</strong> 中，自己的 <strong>_depGroup执行enter操作</strong> ，并且把_depGroup加入到op的 <strong>_groups</strong> 中<br>removeDependency 把依赖的op，从到自己的 <strong>_dependencies</strong> 中移除，然后把op的_groups中自己的 <strong>_depGroup移除并且执行leave操作</strong> </p>
+</blockquote>
+</li>
+<li><p>finish方法</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">internal func finish() &#123;</span><br><span class="line">    lock.lock()</span><br><span class="line">    _finished = true</span><br><span class="line">    _leaveGroups()</span><br><span class="line">    lock.unlock()</span><br><span class="line">    if let queue = _queue &#123;</span><br><span class="line">        queue._operationFinished(self)</span><br><span class="line">    &#125;</span><br><span class="line">#if DEPLOYMENT_ENABLE_LIBDISPATCH</span><br><span class="line">        // The completion block property is a bit cagey and can not be executed locally on the queue due to thread exhaust potentials.</span><br><span class="line">        // This sets up for some strange behavior of finishing operations since the handler will be executed on a different queue</span><br><span class="line">    if let completion = completionBlock &#123;</span><br><span class="line">        DispatchQueue.global(qos: .background).async &#123; () -&gt; Void in</span><br><span class="line">            completion()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">#endif</span><br><span class="line">&#125;	</span><br><span class="line">	</span><br><span class="line">internal func _leaveGroups() &#123;</span><br><span class="line">    // assumes lock is taken</span><br><span class="line">#if DEPLOYMENT_ENABLE_LIBDISPATCH</span><br><span class="line">    _groups.forEach() &#123; $0.leave() &#125;</span><br><span class="line">    _groups.removeAll()</span><br><span class="line">    _group.leave()</span><br><span class="line">#endif</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>NOTE: finish是个内部方法，对_groups的所有的_depGroup执行leave操作，告诉自己加入的 <strong>queue</strong> 已经结束了<br>执行completionBlock，使用global的queue执行。</p>
+</blockquote>
+</li>
+</ol>
+<p>到这里operation的基本的源码就说完了，从简单的源码中可以得出的结论</p>
+<ul>
+<li><p>operation的依赖功能，就是对dispatchgroup功能的封装，通过group的enter，leave，wait（queue里面用到）基本的能力来实现的。</p>
+</li>
+<li><p>简单的operation子类可以重写main方法实现基本的功能</p>
+</li>
+<li>需要自己控制operation的生命周期的，可以重写start方法，并且不要执行父类的方法。</li>
+<li>cancel操作只能cancel掉未执行start方法的operation，如果想cancel掉正在执行中的operation，需要自己在main方法中判断</li>
+</ul>
+<h3 id="OperationQueue调度"><a href="#OperationQueue调度" class="headerlink" title="OperationQueue调度"></a>OperationQueue调度</h3><ol>
+<li><p>operationQueue的基本属性</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">open class OperationQueue: NSObject &#123;</span><br><span class="line">   let lock = NSLock()</span><br><span class="line">#if DEPLOYMENT_ENABLE_LIBDISPATCH</span><br><span class="line">   var __concurrencyGate: DispatchSemaphore?</span><br><span class="line">   var __underlyingQueue: DispatchQueue? &#123;</span><br><span class="line">       didSet &#123;</span><br><span class="line">           let key = OperationQueue.OperationQueueKey</span><br><span class="line">           oldValue?.setSpecific(key: key, value: nil)</span><br><span class="line">           __underlyingQueue?.setSpecific(key: key, value: Unmanaged.passUnretained(self))</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">  		</span><br><span class="line">     let queueGroup = DispatchGroup()</span><br><span class="line">     var unscheduledWorkItems: [DispatchWorkItem] = []</span><br><span class="line">#endif </span><br><span class="line"></span><br><span class="line">   fileprivate var _operations = _OperationList()</span><br><span class="line">   </span><br><span class="line">   .....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<pre><code>operation queue属性里包含着几部分内容：
+
+* 互斥锁
+* 信号量Semaphore
+* __underlying DispatchQueue
+* queueGroup DispatchGroup 
+* DispatchWorkItem数组
+* _OperationList（存放着各种优先级的operation）
+</code></pre><ol start="2">
+<li><p>addOperation方法</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">open func addOperations(_ ops: [Operation], waitUntilFinished wait: Bool) &#123;</span><br><span class="line">#if DEPLOYMENT_ENABLE_LIBDISPATCH</span><br><span class="line">    var waitGroup: DispatchGroup?</span><br><span class="line">    if wait &#123;</span><br><span class="line">        waitGroup = DispatchGroup()</span><br><span class="line">    &#125;</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">    lock.lock()</span><br><span class="line">    ops.forEach &#123; (operation: Operation) -&gt; Void in</span><br><span class="line">        operation._queue = self</span><br><span class="line">        _operations.insert(operation)</span><br><span class="line">    &#125;</span><br><span class="line">    lock.unlock()</span><br><span class="line">#if DEPLOYMENT_ENABLE_LIBDISPATCH</span><br><span class="line">    let items = ops.map &#123; (operation: Operation) -&gt; DispatchWorkItem in</span><br><span class="line">        if let group = waitGroup &#123;</span><br><span class="line">            group.enter()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        return DispatchWorkItem(flags: .enforceQoS) &#123; () -&gt; Void in</span><br><span class="line">            if let sema = self._concurrencyGate &#123;</span><br><span class="line">                sema.wait()</span><br><span class="line">                self._runOperation()</span><br><span class="line">                sema.signal()</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                self._runOperation()</span><br><span class="line">            &#125;</span><br><span class="line">            if let group = waitGroup &#123;</span><br><span class="line">                group.leave()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    let queue = _underlyingQueue</span><br><span class="line">    lock.lock()</span><br><span class="line">    if _suspended &#123;</span><br><span class="line">        unscheduledWorkItems += items</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        items.forEach &#123; queue.async(group: queueGroup, execute: $0) &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    lock.unlock()</span><br><span class="line"></span><br><span class="line">    if let group = waitGroup &#123;</span><br><span class="line">        group.wait()</span><br><span class="line">    &#125;</span><br><span class="line">#endif</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>这段addOperations的方法是queue中关键的方法，下面进行解读：</p>
+<ul>
+<li>waitGroup是内部创建的dispatch group，主要作用是阻塞当前线程，实现waitUntilFinished功能</li>
+<li>ops是准备加入queue的operation，对每个op设置他们的queue为self，并且把他们都加到_operations中，这里的加入过程涉及到优先级问题</li>
+<li>对ops中的每个operation，执行返回值是 <strong>DispatchWorkItem</strong> 的闭包，items中包含的是DispatchWorkItem的数组</li>
+<li>在_underlyingQueue中执行每一个DispatchWorkItem，workItem的主要工作：<ul>
+<li>如果waitGroup存在，对waitGroup执行enter操作，这个也比较好理解，如果需要waitUntilFinished，就要对每个op进行enter，在结束的时候在进行leave操作。</li>
+<li>_concurrencyGate 信号量实现operation queue的并发控制，控制执行_runOperation的数量</li>
+<li>执行_runOperation方法</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li><p>_runOperation方法</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">internal func _runOperation() &#123;</span><br><span class="line">    if let op = _dequeueOperation() &#123;</span><br><span class="line">        if !op.isCancelled &#123;</span><br><span class="line">            op._waitUntilReady()</span><br><span class="line">            if !op.isCancelled &#123;</span><br><span class="line">                op.start()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>_operations执行dequeue操作，返回一个合适的op</li>
+<li>在执行_waitUntilReady和start方法前都加入了isCancelled判断</li>
+<li><p>执行_waitUntilReady，结合上面operation中对  <strong>depGroup</strong>  的解析，可以知道这是在等待依赖的operation结束，一旦依赖结束，或者是没有依赖关系，就会马上进入 <strong>ready</strong> 状态。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">internal func _waitUntilReady() &#123;</span><br><span class="line">#if DEPLOYMENT_ENABLE_LIBDISPATCH</span><br><span class="line">        _depGroup.wait()</span><br><span class="line">#endif</span><br><span class="line">        _ready = true</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>执行op的start方法</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>OperationQueue的调度功能基本上就说完了，不管是operation，还是operationQueue中的waitUntilFinished功能都是 <strong>DispatchGroup</strong> 来实现的，queue的并发功能是通过 <strong>信号量</strong> 来实现。operation的优先级功能也是queue通过_OperationList自定义的结构体进行管理调度的。</p>
+<h2 id="疑问"><a href="#疑问" class="headerlink" title="疑问"></a>疑问</h2><ul>
+<li><p>为什么对isCancelled,isFinished,isReady的读操作都不加锁，而isExecuting的读操作是加锁的</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">open var isCancelled: Bool &#123;</span><br><span class="line">      return _cancelled</span><br><span class="line">&#125;</span><br><span class="line">open var isFinished: Bool &#123;</span><br><span class="line">    return _finished</span><br><span class="line">&#125;</span><br><span class="line">open var isReady: Bool &#123;</span><br><span class="line">    return _ready</span><br><span class="line">&#125;</span><br><span class="line">  open var isExecuting: Bool &#123;</span><br><span class="line">       let wasExecuting: Bool</span><br><span class="line">       lock.lock()</span><br><span class="line">       wasExecuting = _executing</span><br><span class="line">       lock.unlock()</span><br><span class="line"></span><br><span class="line">       return wasExecuting</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>BlockOperation中对main方法重写，如果直接执行他的start方法，executionBlocks不像是在子线程执行的</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">override open func main() &#123;</span><br><span class="line">       lock.lock()</span><br><span class="line">       let block = _block</span><br><span class="line">       let executionBlocks = _executionBlocks</span><br><span class="line">       lock.unlock()</span><br><span class="line">       block()</span><br><span class="line">       executionBlocks.forEach &#123; $0() &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://github.com/apple/swift-corelibs-foundation/blob/master/Foundation/Operation.swift" target="_blank" rel="noopener">Operation</a></p>
+<p><a href="https://developer.apple.com/videos/play/wwdc2015/226/" target="_blank" rel="noopener">Advanced NSOperations</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/NSOperation/" rel="tag"># NSOperation</a>
+          
+            <a href="/tags/NSOperationQueue/" rel="tag"># NSOperationQueue</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/15/面试过程一点感悟/" rel="next" title="面试过程一点感悟">
+                <i class="fa fa-chevron-left"></i> 面试过程一点感悟
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/05/24/Carthage的安装和使用/" rel="prev" title="Carthage的安装和使用">
+                Carthage的安装和使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Pengwll</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用法"><span class="nav-number">2.</span> <span class="nav-text">用法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#特性"><span class="nav-number">3.</span> <span class="nav-text">特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看Swift的Operation、OperationQueue的源码实现。"><span class="nav-number">4.</span> <span class="nav-text">查看Swift的Operation、OperationQueue的源码实现。</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Operation-swift"><span class="nav-number">4.1.</span> <span class="nav-text">Operation.swift</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OperationQueue调度"><span class="nav-number">4.2.</span> <span class="nav-text">OperationQueue调度</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#疑问"><span class="nav-number">5.</span> <span class="nav-text">疑问</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Pengwll</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.1.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

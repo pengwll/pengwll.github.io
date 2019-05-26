@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="简介Carthage致力于使用最简单的方式在应用中添加frameworks，在使用carthage的过程中对项目结构是无入侵的，不会自动的修改你的project文件，或者build settings。对比Cocoapods，cocoapods会修改project文件，自动修改项目的build settings文件。  优点 去中心话，不需要去请求中心库服务器（specs），只需要去请求更新具体对应">
+<meta name="keywords" content="carthage">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Carthage的安装和使用">
+<meta property="og:url" content="http://yoursite.com/2019/05/24/Carthage的安装和使用/index.html">
+<meta property="og:site_name" content="Pengwll&#39;s Home">
+<meta property="og:description" content="简介Carthage致力于使用最简单的方式在应用中添加frameworks，在使用carthage的过程中对项目结构是无入侵的，不会自动的修改你的project文件，或者build settings。对比Cocoapods，cocoapods会修改project文件，自动修改项目的build settings文件。  优点 去中心话，不需要去请求中心库服务器（specs），只需要去请求更新具体对应">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2019/05/24/Carthage的安装和使用/20190525153513.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/05/24/Carthage的安装和使用/image.png">
+<meta property="og:image" content="https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat">
+<meta property="og:updated_time" content="2019-05-26T06:13:21.370Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Carthage的安装和使用">
+<meta name="twitter:description" content="简介Carthage致力于使用最简单的方式在应用中添加frameworks，在使用carthage的过程中对项目结构是无入侵的，不会自动的修改你的project文件，或者build settings。对比Cocoapods，cocoapods会修改project文件，自动修改项目的build settings文件。  优点 去中心话，不需要去请求中心库服务器（specs），只需要去请求更新具体对应">
+<meta name="twitter:image" content="http://yoursite.com/2019/05/24/Carthage的安装和使用/20190525153513.jpg">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://yoursite.com/2019/05/24/Carthage的安装和使用/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Carthage的安装和使用 | Pengwll's Home</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Pengwll's Home</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">点滴记录</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/05/24/Carthage的安装和使用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Pengwll">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Pengwll's Home">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Carthage的安装和使用
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-24 09:32:23" itemprop="dateCreated datePublished" datetime="2019-05-24T09:32:23+08:00">2019-05-24</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/工具/" itemprop="url" rel="index"><span itemprop="name">工具</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p><a href="https://github.com/Carthage/Carthage" target="_blank" rel="noopener">Carthage</a>致力于使用最简单的方式在应用中添加frameworks，在使用carthage的过程中对项目结构是无入侵的，不会自动的修改你的project文件，或者build settings。对比<a href="https://cocoapods.org/" target="_blank" rel="noopener">Cocoapods</a>，cocoapods会修改project文件，自动修改项目的build settings文件。</p>
+<ul>
+<li>优点<ul>
+<li>去中心话，不需要去请求中心库服务器（specs），只需要去请求更新具体对应的库信息即可。</li>
+<li>clean后，第三方库不会每一次都重新编译</li>
+<li>对工程文件没有修改</li>
+<li>只要工程支持编译成Framework就可以使用Carthage</li>
+</ul>
+</li>
+</ul>
+<a id="more"></a>
+<h2 id="安装配置"><a href="#安装配置" class="headerlink" title="安装配置"></a>安装配置</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><ul>
+<li>Installer: Carthage.pkg 文件安装最新<a href="https://github.com/Carthage/Carthage/releases" target="_blank" rel="noopener">release</a>版本.</li>
+<li><p>Homebrew: 使用<a href="https://brew.sh/" target="_blank" rel="noopener">Homebrew</a>安装carthage最新版本</p>
+<pre><code>brew update 
+brew install carthage
+</code></pre><p>  升级</p>
+<pre><code>brew upgrade carthage
+</code></pre><p>  卸载</p>
+<pre><code>sudo brew uninstall carthage
+</code></pre></li>
+</ul>
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><ul>
+<li><p>创建 Cartfile文件</p>
+<pre><code>//进入工程目录
+cd ~/project
+//创建Cartfile
+touch Cartfile
+//使用Xcode命令打开Cartfile文件
+open -a Xcode Cartfile
+</code></pre></li>
+</ul>
+<ul>
+<li><p>编辑Cartfile添加依赖库 （依赖库必须要支持carthage）</p>
+<pre><code>github &quot;AFNetwork/AFNetworkking&quot; == 4.5
+github &quot;AFNetwork/AFNetworkking&quot; ~&gt; 3.2
+</code></pre></li>
+</ul>
+<blockquote>
+<ul>
+<li>Dependency origin: project的位置<br>github：来自Github<br>git: 来自git仓库</li>
+<li>使用 Username/ProjectName 指定一个project</li>
+<li>版本的含义:<br>  ~&gt;3.0: 表示使用版本3.0以上但是低于4.0的最新版本，如3.5, 3.9。<br>  =3.0: 表示大于3.0的版本<br>  ==3.0: 表示使用3.0版本。<br>  =3.0: 表示使用3.0或更高的版本。<br>  如果你没有指明版本号，则会自动使用最新的版本。</li>
+<li>指定branch name / tag name / commit name:<br>  使用指定的 “branch / tag / commit”<br>  (例如：分支”master”、提交”5c8a74a”)</li>
+</ul>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 使用最新的版本</span><br><span class="line">github &quot;jspahrsummers/xcconfigs&quot;</span><br><span class="line">// 加载任意git，development分支</span><br><span class="line">git &quot;git@gitlab.ximalaya.com:iphone/XMNetworkRequest.git&quot; &quot;development&quot;</span><br><span class="line">// 加载本地project，指定branch分支</span><br><span class="line">git &quot;file:///directory/to/project&quot; &quot;branch&quot;</span><br><span class="line"># A binary only framework</span><br><span class="line">binary &quot;https://my.domain.com/release/MyFramework.json&quot; ~&gt; 2.3</span><br></pre></td></tr></table></figure>
+<h2 id="编译项目"><a href="#编译项目" class="headerlink" title="编译项目"></a>编译项目</h2><pre><code>// 更新
+carthage update --platform iOS
+// 更新指定库
+carthage update SVProgressHUD --platform iOS
+</code></pre><p>carthage checkout代码，然后编译成Framework。所有的文件会被编译到当前路径的Carthage文件夹中：</p>
+<p><img src="/2019/05/24/Carthage的安装和使用/20190525153513.jpg" alt="Carthage目录"></p>
+<p>文件说明：</p>
+<ul>
+<li><p>Cartfile.resolved: </p>
+<blockquote>
+<p>Cartfile的附属文件，记录当前安装库的版本号；强烈建议将该文件加入到版本控制中，告知其他开发者，当前使用的版本。</p>
+</blockquote>
+</li>
+<li><p>Carthage文件夹：（是否加入版本控制，由开发者自己考虑） </p>
+<ul>
+<li><p>Build: </p>
+<blockquote>
+<p>包含对应平台编译好的Framework</p>
+</blockquote>
+</li>
+<li><p>Checkouts: </p>
+<blockquote>
+<p>包含编译Framework所使用的源代码（不要修改这里的代码，carthage update 和 carthage checkout会覆盖这里的代码，清除你的修改）</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="引入Carthage依赖库到Xcode"><a href="#引入Carthage依赖库到Xcode" class="headerlink" title="引入Carthage依赖库到Xcode"></a>引入Carthage依赖库到Xcode</h2><ul>
+<li><p>在Carthage-&gt;Build中找到需要添加的Framework，拖拽对应的Framework到Xcode工程的Embed Frameworks中。</p>
+</li>
+<li><p>进入工程的 target -&gt; Build Phases，点击“+”，添加“New Run Script Phase”，添加如下脚本命令：</p>
+<pre><code>/usr/local/bin/carthage copy-frameworks
+</code></pre><p>  添加一下Input Files:</p>
+<pre><code>$(SRCROOT)/Carthage/Build/iOS/Alamofire.framework
+</code></pre></li>
+</ul>
+<blockquote>
+<p>该命令的目的：<br>当App提交到App Store时，如果App的Framework包含了iOS模拟器的binary images，会被拒绝 App Store submission bug。所以carthage copy-frameworks命令是为了移除Framework多余的模拟器架构(变通方案)。</p>
+</blockquote>
+<ul>
+<li>嵌套依赖<br>依赖库本身还依赖其他的库，需要显式在Cartfile中写出，并且手动拖拽到自己的项目中。</li>
+</ul>
+<h2 id="工程支持Carthage"><a href="#工程支持Carthage" class="headerlink" title="工程支持Carthage"></a>工程支持Carthage</h2><p>Carthage并没有中心化的库，不像CocoaPods一样添加很多specs。动态库生成是根据项目中<br>framework target自动编译的。</p>
+<p>Carthage只能构建已经分享Xcode schemes的.xcodeproj工程，通过运行carthage build –no-skip-current来查看你的所有的intended schemes是否构建成功，然后检查Carthage/Build文件夹是否有编译成功的framework。</p>
+<ul>
+<li>创建一个Cocoa Touch Framework，添加需要编译的文件</li>
+<li><p>打开scheme shared选项</p>
+<p>  <img src="/2019/05/24/Carthage的安装和使用/image.png" alt="Carthage目录"></p>
+</li>
+<li><p>运行<code>carthage build --no-skip-current</code>。如果编译出现问题可以执行xcodebuild命令进行编译检查。</p>
+<pre><code>// (WORKSPACE为具体name.xcworkspace)
+xcodebuild -scheme SCHEME -workspace WORKSPACE build
+// 或者 
+// (PROJECT为具体name.xcodeproj)
+xcodebuild -scheme SCHEME -project PROJECT build
+</code></pre></li>
+<li><p>本地通过编译后，给项目打tag。推送到远端。Carthage是通过搜索发布到仓库的tag来判断framework的哪个版本是可用的，tag的命名应该用比较简单的方式，比如tag v1.2，语义版本是1.2.0。</p>
+<blockquote>
+<p>这里有个坑，如果你的tag中包含Cartfile文件，指定了一些库的版本。那么在其他库里使用Cartfile指定版本打包就会出问题，Carthage会拉去远端tag的代码，按照远端Cartfile地址去打，如果与本地Cartfile指定的版本不一致，就会产生冲突，无法打包成功</p>
+</blockquote>
+</li>
+<li><p>构建静态库来加快App的启动。</p>
+<p>  过多的dynamic frameworks会减慢app的启动时间，Carthage可以通过把动态库构建成静态库来优化启动时间。具体方法查看<a href="https://github.com/Carthage/Carthage/blob/master/Documentation/StaticFrameworks.md" target="_blank" rel="noopener">StaticFrameworks doc</a>。</p>
+<p>  <a href="https://github.com/Carthage/Carthage" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat" alt="Carthage compatible"></a></p>
+</li>
+</ul>
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><p>本地build</p>
+<pre><code>// 查看
+carthage version
+
+carthage build --no-skip-current
+
+carthage update --no-use-binaries --platform iOS
+
+carthage help
+</code></pre><h2 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h2><p><a href="https://github.com/Carthage/Carthage" target="_blank" rel="noopener">Carthage</a></p>
+<p><a href="https://www.zybuluo.com/Sweetfish/note/1013133" target="_blank" rel="noopener">Carthage的使用</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/carthage/" rel="tag"># carthage</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/15/NSOperation-NSOperationQueue/" rel="next" title="NSOperation & NSOperationQueue">
+                <i class="fa fa-chevron-left"></i> NSOperation & NSOperationQueue
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Pengwll</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装配置"><span class="nav-number">2.</span> <span class="nav-text">安装配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装"><span class="nav-number">2.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置"><span class="nav-number">2.2.</span> <span class="nav-text">配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编译项目"><span class="nav-number">3.</span> <span class="nav-text">编译项目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#引入Carthage依赖库到Xcode"><span class="nav-number">4.</span> <span class="nav-text">引入Carthage依赖库到Xcode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#工程支持Carthage"><span class="nav-number">5.</span> <span class="nav-text">工程支持Carthage</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常用命令"><span class="nav-number">6.</span> <span class="nav-text">常用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考："><span class="nav-number">7.</span> <span class="nav-text">参考：</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Pengwll</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.1.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
